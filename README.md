@@ -14,8 +14,8 @@ You don't need to open any inbound ports in your network.
 
     ```shell
     mkdir notificationproxy && cd notificationproxy
-    curl -O https://raw.githubusercontent.com/LTsCreed/notificationproxy/refs/heads/main/docker-compose.yml
-    curl -L https://raw.githubusercontent.com/LTsCreed/notificationproxy/refs/heads/main/.env.example -o ".env"
+    curl -O https://raw.githubusercontent.com/ltscreed/notificationproxy/refs/heads/master/docker-compose.yml
+    curl -L https://raw.githubusercontent.com/ltscreed/notificationproxy/refs/heads/master/.env.example -o ".env"
     ```
 
 2. Configure environment variables
