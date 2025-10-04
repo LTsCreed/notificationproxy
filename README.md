@@ -54,7 +54,7 @@ You can change this port using the environment variable `SERVER_HOOK_PORT`.
 To send a message, configure your software to make a POST request to:
 
 ```text
-http://notificationproxy.example.com/hook?host=gitea.example.com
+http://notificationproxy.example.com:8080/hook?host=gitea.example.com
 ```
 
 You can also include additional query parameters — these will be included in the forwarded message.
