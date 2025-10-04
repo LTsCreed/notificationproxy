@@ -1,0 +1,9 @@
+services:
+  notificationproxy:
+    env_file: .env
+    restart: always
+    # build: . # uncomment to build from source
+    image: ghcr.io/LTsCreed/notificationproxy:latest # comment to build from source
+    ports:
+      - 2525:2525
+      - 8080:8080
