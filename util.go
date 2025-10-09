@@ -15,8 +15,9 @@ func getEnv(key, fallback string) string {
 var logger = log.New(os.Stdout, "notificationProxy: ", log.LstdFlags)
 
 type Notification struct {
-	Msg     string
-	MsgType string
+	Msg         string
+	Source      string
+	ContentType string
 	// Additional fields to include in the message; handling is upstream-specific
 	Attributes map[string]string
 	// Internal metadata; must not be included in the upstream message

@@ -2,10 +2,9 @@ package main
 
 import (
 	"io"
-	"mime"
-	"net/mail"
 
 	smtp "github.com/emersion/go-smtp"
+	"github.com/jhillyerd/enmime"
 )
 
 /*
@@ -37,21 +36,15 @@ func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 
 func (s *Session) Data(r io.Reader) error {
 
-	m, err := mail.ReadMessage(r)
+	m, err := enmime.ReadEnvelope(r)
 	if err != nil {
 		logger.Printf("failed to parse mail message %s\n", err)
 		return nil
 	}
 
-	b, err := io.ReadAll(m.Body)
-	if err != nil {
-		return err
-	}
-
-	dec := new(mime.WordDecoder)
-	from, _ := dec.DecodeHeader(m.Header.Get("From"))
-	to, _ := dec.DecodeHeader(m.Header.Get("To"))
-	subject, _ := dec.DecodeHeader(m.Header.Get("Subject"))
+	from := m.GetHeader("From")
+	to := m.GetHeader("To")
+	subject := m.GetHeader("Subject")
 
 	attributes := &map[string]string{
 		"Original From": from,
@@ -59,14 +52,14 @@ func (s *Session) Data(r io.Reader) error {
 		"Subject":       subject,
 	}
 
-	if getEnv("SERVER_SMTP_INCLUDE_ORIGINAL_HEADER", "true") == "false" {
-		attributes = &map[string]string{}
-	}
+	contentType := "text"
+	msg := m.Text
 
 	messageQueue <- &Notification{
-		Msg:        string(b),
-		MsgType:    "email",
-		Attributes: *attributes,
+		Msg:         msg,
+		Source:      "email",
+		ContentType: contentType,
+		Attributes:  *attributes,
 		Meta: map[string]string{
 			"subject": subject,
 			"to":      to,

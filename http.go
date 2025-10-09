@@ -47,7 +47,7 @@ func HttpWebhookHandler(w http.ResponseWriter, req *http.Request) {
 
 	messageQueue <- &Notification{
 		Msg:        string(body),
-		MsgType:    "webhook",
+		Source:     "webhook",
 		Attributes: attributes,
 		Meta:       map[string]string{},
 	}
