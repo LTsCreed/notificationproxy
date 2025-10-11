@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -16,7 +18,7 @@ type HookMessage struct {
 	Message        string
 }
 
-// Used by Dokcer, Kubernetes probes
+// Used by Docker, Kubernetes probes
 func HttpStatusHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -24,6 +26,24 @@ func HttpStatusHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func parseJSON(body []byte) string {
+	var bodyJSON any
+
+	json.Unmarshal(body, &bodyJSON)
+
+	switch v := bodyJSON.(type) {
+	case map[string]any:
+		var attributes = make([]string, 0)
+		for k, v := range v {
+			attributes = append(attributes, fmt.Sprintf("%s: %s", k, v))
+		}
+		return strings.Join(attributes, "\n")
+	default:
+		return string(body)
+	}
+
 }
 
 func HttpWebhookHandler(w http.ResponseWriter, req *http.Request) {
@@ -39,6 +59,14 @@ func HttpWebhookHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	var msg string
+	switch req.Header.Get("Content-Type") {
+	case "application/json":
+		msg = parseJSON(body)
+	default:
+		msg = string(body)
+	}
+
 	attributes := map[string]string{}
 
 	for k, v := range req.URL.Query() {
@@ -46,10 +74,11 @@ func HttpWebhookHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	messageQueue <- &Notification{
-		Msg:        string(body),
-		Source:     "webhook",
-		Attributes: attributes,
-		Meta:       map[string]string{},
+		Msg:         msg,
+		Source:      "webhook",
+		Attributes:  attributes,
+		ContentType: "text",
+		Meta:        map[string]string{},
 	}
 
 	w.WriteHeader(http.StatusAccepted)

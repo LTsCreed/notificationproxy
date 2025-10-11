@@ -52,6 +52,10 @@ func (s *Session) Data(r io.Reader) error {
 		"Subject":       subject,
 	}
 
+	if getEnv("SERVER_SMTP_INCLUDE_ORIGINAL_HEADER", "true") == "false" {
+		attributes = &map[string]string{}
+	}
+
 	contentType := "text"
 	msg := m.Text
 
